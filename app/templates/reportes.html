@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-primary fw-bold mb-0">📊 Panel de Inteligencia y Reportes</h2>
+    <span class="text-muted"><i class="bi bi-clock"></i> Última actualización: Hoy</span>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-danger text-white py-3">
+                <h5 class="mb-0">🕒 Top 5 - Horas de Mayor Demanda</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for h in top_horarios %}
+                <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                    <span class="fw-semibold">{{ h.hora_del_dia }}:00 a {{ h.hora_del_dia }}:59</span>
+                    <span class="badge bg-danger rounded-pill fs-6">{{ h.total_vehiculos }} autos</span>
+                </li>
+                {% else %}
+                <li class="list-group-item text-muted py-4 text-center">Aún no hay suficientes datos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-info text-dark py-3">
+                <h5 class="mb-0">📅 Top 5 - Meses de Mayor Demanda</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for m in top_meses %}
+                <li class="list-group-item d-flex justify-content-between align-items-center text-capitalize py-3">
+                    <span class="fw-semibold">{{ m.mes }}</span>
+                    <span class="badge bg-info text-dark rounded-pill fs-6">{{ m.total_vehiculos }} autos</span>
+                </li>
+                {% else %}
+                <li class="list-group-item text-muted py-4 text-center">Aún no hay suficientes datos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0">💰 Ingresos Históricos por Año y Servicio</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Año de Operación</th>
+                        <th>Tipo de Servicio</th>
+                        <th class="text-end pe-4">Ingresos Totales (MXN)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in ingresos %}
+                    <tr>
+                        <td class="fw-bold ps-4">{{ f.anio }}</td>
+                        <td class="text-capitalize">
+                            {% if f.tipo_servicio == 'pension' %}
+                                <span class="badge bg-info text-dark">Pensión</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Cajón</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end text-success fw-bold pe-4 fs-5">
+                            ${{ "%.2f"|format(f.ingresos if f.ingresos else 0) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center py-5 text-muted">
+                            <em>No hay ingresos financieros registrados para mostrar.</em>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-5">
+    <div class="card-header bg-secondary text-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">📋 Bitácora Detallada de Movimientos</h5>
+        <span class="badge bg-light text-dark">Últimos 100</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+            <table class="table table-hover table-sm align-middle mb-0 text-center">
+                <thead class="table-light sticky-top shadow-sm">
+                    <tr>
+                        <th class="py-2">Folio</th>
+                        <th class="py-2">Matrícula</th>
+                        <th class="py-2">Servicio</th>
+                        <th class="py-2">Llegada (Fecha y Hora)</th>
+                        <th class="py-2">Salida (Fecha y Hora)</th>
+                        <th class="text-end pe-4 py-2">Monto Cobrado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in historial %}
+                    <tr>
+                        <td class="text-muted small">#{{ h.folio_servicio }}</td>
+                        <td class="fw-bold text-uppercase fs-6 text-primary">{{ h.matricula }}</td>
+                        <td class="text-capitalize">
+                            {% if h.tipo_servicio == 'pension' %}
+                                <span class="badge bg-info text-dark">Pensión</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark border">Cajón</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold">{{ h.fecha_entrada }}</span>
+                                <small class="text-muted">{{ h.hora_entrada }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            {% if h.fecha_salida %}
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">{{ h.fecha_salida }}</span>
+                                    <small class="text-muted">{{ h.hora_salida }}</small>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-warning text-dark px-3 py-2 mt-1 shadow-sm">
+                                    <i class="bi bi-car-front-fill me-1"></i> Adentro
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4 fw-bold text-success fs-6">
+                            {% if h.monto_total %}
+                                ${{ "%.2f"|format(h.monto_total) }}
+                            {% else %}
+                                <span class="text-muted fw-normal">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="py-5 text-muted">
+                            <em>No hay movimientos registrados en la bitácora del sistema.</em>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
